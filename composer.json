@@ -1,0 +1,19 @@
+{
+    "name": "jimmy_erc/taskify",
+    "description": "Taskify es un gestor de tareas y proyectos",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jimmy-ERC",
+            "email": "jimmy.ramos@catolica.edu.sv"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
