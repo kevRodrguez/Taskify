@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Tareas;
 
+use App\Contratos\TareaInterface;
 use App\Estado\EstadoTarea;
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -12,7 +13,7 @@ abstract class TareaBase implements TareaInterface
 {
     private string $titulo;
     private string $descripcion;
-    private DateTimeImmutable $fechaVencimiento;
+    private readonly DateTimeImmutable $fechaVencimiento;
 
     public function __construct(string $titulo, string $descripcion, DateTimeImmutable $fechaVencimiento)
     {
