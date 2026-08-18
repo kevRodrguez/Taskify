@@ -89,6 +89,21 @@ printf(
     $backupDiario->obtenerEstado()->value
 );
 
+$cierreMensual = new TareaRecurrente(
+    'Cierre contable mensual',
+    'Conciliar movimientos al último día del mes',
+    new DateTimeImmutable('2026-01-31'),
+    Periodicidad::MENSUAL,
+    100.0
+);
+echo PHP_EOL . "=== Recurrencia mensual (día 31 sin desbordar a marzo) ===" . PHP_EOL;
+echo "Ancla: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')}" . PHP_EOL;
+$cierreMensual->completarCiclo();
+echo "Ciclo 1: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (febrero, último día válido)" . PHP_EOL;
+$cierreMensual->setAvance(100.0);
+$cierreMensual->completarCiclo();
+echo "Ciclo 2: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (marzo, se recupera el día 31)" . PHP_EOL;
+
 echo PHP_EOL . "=== Validación de encapsulamiento (demo en vivo) ===" . PHP_EOL;
 
 try {

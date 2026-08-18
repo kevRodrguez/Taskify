@@ -75,7 +75,24 @@ final class TareaRecurrente extends TareaBase
         return match ($this->periodicidad) {
             Periodicidad::DIARIA => $fecha->modify('+1 day'),
             Periodicidad::SEMANAL => $fecha->modify('+1 week'),
-            Periodicidad::MENSUAL => $fecha->modify('+1 month'),
+            Periodicidad::MENSUAL => $this->avanzarUnMesCalendario($fecha),
         };
+    }
+
+    /**
+     * Avanza al mes calendario siguiente. Si el día ancla no existe (ej. 31 ene → feb),
+     * recorta al último día válido en lugar de desbordar a marzo con modify('+1 month').
+     */
+    private function avanzarUnMesCalendario(DateTimeImmutable $fecha): DateTimeImmutable
+    {
+        $diaAncla = (int) parent::getFechaVencimiento()->format('j');
+        $inicioSiguienteMes = $fecha->modify('first day of next month');
+        $ultimoDiaSiguienteMes = (int) $inicioSiguienteMes->format('t');
+
+        return $inicioSiguienteMes->setDate(
+            (int) $inicioSiguienteMes->format('Y'),
+            (int) $inicioSiguienteMes->format('n'),
+            min($diaAncla, $ultimoDiaSiguienteMes)
+        );
     }
 }
