@@ -6,6 +6,8 @@ require __DIR__ . '/vendor/autoload.php';
 
 use App\Tablero\Tablero;
 use App\Tareas\TareaCompuesta;
+use App\Tareas\Periodicidad;
+use App\Tareas\TareaRecurrente;
 use App\Tareas\TareaSimple;
 
 $disenoUI = new TareaSimple(
@@ -37,11 +39,29 @@ $moduloFrontend->agregarSubtarea($disenoUI);
 $moduloFrontend->agregarSubtarea($maquetadoUI);
 $moduloFrontend->agregarSubtarea($documentacion);
 
+$reunionSemanal = new TareaRecurrente(
+    'Reunión semanal de seguimiento',
+    'Sincronizar avances del equipo cada semana',
+    new DateTimeImmutable('+3 days'),
+    Periodicidad::SEMANAL,
+    60.0
+);
+
+$backupDiario = new TareaRecurrente(
+    'Respaldo diario del proyecto',
+    'Generar copia de seguridad del repositorio',
+    new DateTimeImmutable('today'),
+    Periodicidad::DIARIA,
+    100.0
+);
+
 $tablero = new Tablero();
 $tablero->agregarTarea($disenoUI);
 $tablero->agregarTarea($maquetadoUI);
 $tablero->agregarTarea($documentacion);
 $tablero->agregarTarea($moduloFrontend);
+$tablero->agregarTarea($reunionSemanal);
+$tablero->agregarTarea($backupDiario);
 
 echo '=== Tablero de tareas (Taskify) ===' . PHP_EOL;
 
@@ -58,6 +78,40 @@ foreach ($tablero->agruparPorEstadoOrdenado() as $estado => $tareasDelEstado) {
 }
 
 echo PHP_EOL . '=== Validación de encapsulamiento (demo en vivo) ===' . PHP_EOL;
+
+echo PHP_EOL . "=== Recurrencia: completar ciclo ===" . PHP_EOL;
+printf(
+    'Antes:  %s | Periodicidad: %s | Vence: %s | Avance: %.1f%% | Estado: %s' . PHP_EOL,
+    $backupDiario->getTitulo(),
+    $backupDiario->getPeriodicidad()->value,
+    $backupDiario->getFechaVencimiento()->format('Y-m-d'),
+    $backupDiario->calcularAvance(),
+    $backupDiario->obtenerEstado()->value
+);
+$backupDiario->completarCiclo();
+printf(
+    'Después: %s | Periodicidad: %s | Vence: %s | Avance: %.1f%% | Estado: %s' . PHP_EOL,
+    $backupDiario->getTitulo(),
+    $backupDiario->getPeriodicidad()->value,
+    $backupDiario->getFechaVencimiento()->format('Y-m-d'),
+    $backupDiario->calcularAvance(),
+    $backupDiario->obtenerEstado()->value
+);
+
+$cierreMensual = new TareaRecurrente(
+    'Cierre contable mensual',
+    'Conciliar movimientos al último día del mes',
+    new DateTimeImmutable('2026-01-31'),
+    Periodicidad::MENSUAL,
+    100.0
+);
+echo PHP_EOL . "=== Recurrencia mensual (día 31 sin desbordar a marzo) ===" . PHP_EOL;
+echo "Ancla: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')}" . PHP_EOL;
+$cierreMensual->completarCiclo();
+echo "Ciclo 1: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (febrero, último día válido)" . PHP_EOL;
+$cierreMensual->setAvance(100.0);
+$cierreMensual->completarCiclo();
+echo "Ciclo 2: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (marzo, se recupera el día 31)" . PHP_EOL;
 
 try {
     new TareaSimple('', 'Sin título', new DateTimeImmutable());
