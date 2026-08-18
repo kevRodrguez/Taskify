@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-use App\Contratos\TareaInterface;
+use App\Tablero\Tablero;
 use App\Tareas\TareaCompuesta;
 use App\Tareas\TareaSimple;
 
@@ -37,21 +37,27 @@ $moduloFrontend->agregarSubtarea($disenoUI);
 $moduloFrontend->agregarSubtarea($maquetadoUI);
 $moduloFrontend->agregarSubtarea($documentacion);
 
-/** @var TareaInterface[] $tareas */
-$tareas = [$disenoUI, $maquetadoUI, $moduloFrontend];
+$tablero = new Tablero();
+$tablero->agregarTarea($disenoUI);
+$tablero->agregarTarea($maquetadoUI);
+$tablero->agregarTarea($documentacion);
+$tablero->agregarTarea($moduloFrontend);
 
-echo "=== Reporte de tareas (Taskify) ===" . PHP_EOL;
+echo '=== Tablero de tareas (Taskify) ===' . PHP_EOL;
 
-foreach ($tareas as $tarea) {
-    printf(
-        '- %-32s | Avance: %5.1f%% | Estado: %s' . PHP_EOL,
-        $tarea->getTitulo(),
-        $tarea->calcularAvance(),
-        $tarea->obtenerEstado()->value
-    );
+foreach ($tablero->agruparPorEstadoOrdenado() as $estado => $tareasDelEstado) {
+    echo PHP_EOL . "[{$estado}]" . PHP_EOL;
+
+    foreach ($tareasDelEstado as $tarea) {
+        printf(
+            '- %-32s | Avance: %5.1f%%' . PHP_EOL,
+            $tarea->getTitulo(),
+            $tarea->calcularAvance()
+        );
+    }
 }
 
-echo PHP_EOL . "=== Validación de encapsulamiento (demo en vivo) ===" . PHP_EOL;
+echo PHP_EOL . '=== Validación de encapsulamiento (demo en vivo) ===' . PHP_EOL;
 
 try {
     new TareaSimple('', 'Sin título', new DateTimeImmutable());
