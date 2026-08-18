@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-use App\Contratos\TareaInterface;
-use App\Tareas\Periodicidad;
+use App\Tablero\Tablero;
 use App\Tareas\TareaCompuesta;
+use App\Tareas\Periodicidad;
 use App\Tareas\TareaRecurrente;
 use App\Tareas\TareaSimple;
 
@@ -55,20 +55,29 @@ $backupDiario = new TareaRecurrente(
     100.0
 );
 
-/** @var TareaInterface[] $tareas */
-$tareas = [$disenoUI, $maquetadoUI, $moduloFrontend, $reunionSemanal, $backupDiario];
+$tablero = new Tablero();
+$tablero->agregarTarea($disenoUI);
+$tablero->agregarTarea($maquetadoUI);
+$tablero->agregarTarea($documentacion);
+$tablero->agregarTarea($moduloFrontend);
+$tablero->agregarTarea($reunionSemanal);
+$tablero->agregarTarea($backupDiario);
 
-echo "=== Reporte de tareas (Taskify) ===" . PHP_EOL;
+echo '=== Tablero de tareas (Taskify) ===' . PHP_EOL;
 
-foreach ($tareas as $tarea) {
-    printf(
-        '- %-36s | Avance: %5.1f%% | Estado: %-12s | Vence: %s' . PHP_EOL,
-        $tarea->getTitulo(),
-        $tarea->calcularAvance(),
-        $tarea->obtenerEstado()->value,
-        $tarea->getFechaVencimiento()->format('Y-m-d')
-    );
+foreach ($tablero->agruparPorEstadoOrdenado() as $estado => $tareasDelEstado) {
+    echo PHP_EOL . "[{$estado}]" . PHP_EOL;
+
+    foreach ($tareasDelEstado as $tarea) {
+        printf(
+            '- %-32s | Avance: %5.1f%%' . PHP_EOL,
+            $tarea->getTitulo(),
+            $tarea->calcularAvance()
+        );
+    }
 }
+
+echo PHP_EOL . '=== Validación de encapsulamiento (demo en vivo) ===' . PHP_EOL;
 
 echo PHP_EOL . "=== Recurrencia: completar ciclo ===" . PHP_EOL;
 printf(
@@ -103,8 +112,6 @@ echo "Ciclo 1: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (febrero
 $cierreMensual->setAvance(100.0);
 $cierreMensual->completarCiclo();
 echo "Ciclo 2: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (marzo, se recupera el día 31)" . PHP_EOL;
-
-echo PHP_EOL . "=== Validación de encapsulamiento (demo en vivo) ===" . PHP_EOL;
 
 try {
     new TareaSimple('', 'Sin título', new DateTimeImmutable());
