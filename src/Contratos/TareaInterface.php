@@ -26,4 +26,14 @@ interface TareaInterface
     public function getDescripcion(): string;
 
     public function getFechaVencimiento(): DateTimeImmutable;
+
+    /**
+     * Representa la tarea como un arreglo asociativo listo para serializar.
+     *
+     * Cada tarea concreta sabe describirse a sí misma: así ExportadorJson
+     * puede recorrer un Tablero heterogéneo sin instanceof.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array;
 }

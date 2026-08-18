@@ -47,4 +47,20 @@ final class TareaCompuesta extends TareaBase
     {
         return $this->determinarEstadoPorAvance($this->calcularAvance());
     }
+
+    /**
+     * Extiende la representación base agregando las subtareas, cada una
+     * serializada recursivamente mediante su propio toArray() polimórfico.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return parent::toArray() + [
+            'subtareas' => array_map(
+                static fn (TareaInterface $subtarea): array => $subtarea->toArray(),
+                $this->subtareas
+            ),
+        ];
+    }
 }

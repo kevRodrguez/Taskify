@@ -70,6 +70,18 @@ final class TareaRecurrente extends TareaBase
         return $this->determinarEstadoPorAvance($this->calcularAvance());
     }
 
+    /**
+     * Extiende la representación base agregando la periodicidad propia de esta tarea.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return parent::toArray() + [
+            'periodicidad' => $this->periodicidad->value,
+        ];
+    }
+
     private function calcularSiguienteFecha(DateTimeImmutable $fecha): DateTimeImmutable
     {
         return match ($this->periodicidad) {

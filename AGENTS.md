@@ -71,10 +71,10 @@ TareaBase (clase abstracta)
     ↑ extends
     ├── TareaSimple      ✅ implementada
     ├── TareaCompuesta   ✅ implementada
-    └── TareaRecurrente  ❌ pendiente
+    └── TareaRecurrente  ✅ implementada
 
-Tablero                  ❌ pendiente (agrupa TareaInterface[] por estado)
-ExportadorJson (?)       ❌ pendiente (o método en Tablero)
+Tablero                  ✅ implementado (agrupa TareaInterface[] por estado)
+ExportadorJson           ✅ implementado (App\Reportes, exporta/importa JSON)
 ```
 
 ### Responsabilidades por clase
@@ -87,21 +87,27 @@ ExportadorJson (?)       ❌ pendiente (o método en Tablero)
 | `TareaSimple` | `App\Tareas` | Avance manual (0–100) |
 | `TareaCompuesta` | `App\Tareas` | Composición de `TareaInterface[]`, promedia avance |
 | `TareaRecurrente` | `App\Tareas` | Recalcula fecha de vencimiento según periodicidad |
-| `Tablero` | `App\Tablero` (sugerido) | Colección heterogénea, agrupa por `obtenerEstado()` |
+| `Tablero` | `App\Tablero` | Colección heterogénea, agrupa por `obtenerEstado()` |
+| `ExportadorJson` | `App\Reportes` | Exporta/importa el tablero como JSON vía `toArray()` polimórfico |
 
 ---
 
 ## 5. Estado actual de implementación
 
-### ✅ Completado (mergeado en `dev` vía PR #1)
+### ✅ Completado
 
 ```
 src/
   Contratos/TareaInterface.php
   Estado/EstadoTarea.php
+  Tableros/... (ver Tablero/Tablero.php)
   Tareas/TareaBase.php
   Tareas/TareaSimple.php
   Tareas/TareaCompuesta.php
+  Tareas/TareaRecurrente.php
+  Tareas/Periodicidad.php
+  Tablero/Tablero.php
+  Reportes/ExportadorJson.php
 main.php
 composer.json
 .gitignore
@@ -114,15 +120,18 @@ composer dump-autoload
 php main.php
 ```
 
-`main.php` crea tareas de prueba, recorre un arreglo `TareaInterface[]` polimórficamente y demuestra una excepción de encapsulamiento en vivo.
+`main.php` crea tareas de prueba, arma un `Tablero`, recorre un arreglo `TareaInterface[]` polimórficamente, demuestra recurrencia (`completarCiclo()`), exporta/importa el tablero a JSON con `ExportadorJson`, y demuestra una excepción de encapsulamiento en vivo.
 
-### ❌ Pendiente para el primer avance
+### 📄 Manejo de archivos (JSON) — detalle de implementación
 
-| Tarea | Rama sugerida | Prioridad | Notas |
-|---|---|---|---|
-| `TareaRecurrente` | `feature/tarea-recurrente` | Alta | Hereda de `TareaBase`; periodicidad diaria/semanal/mensual |
-| `Tablero` | `feature/tablero` | **Crítica** | 14 pts de la rúbrica en Polimorfismo; recorrer arreglo sin `instanceof` |
-| Exportación a archivo | `feature/exportacion-archivo` | Media | JSON con `json_encode`; puede presentarse solo como diseño si no hay tiempo |
+Rama: `feature/exportacion-archivo`. Cumple el criterio "Manejo de archivos (avance)" de la rúbrica (8 pts) con implementación real, no solo diseño.
+
+- `TareaInterface::toArray(): array` — nuevo método del contrato; cada tarea concreta sabe representarse a sí misma.
+- `TareaBase::toArray()` — implementación por defecto con los campos comunes (título, descripción, fechaVencimiento, avance, estado).
+- `TareaCompuesta::toArray()` — llama `parent::toArray()` y agrega `subtareas` recorriendo sus `TareaInterface[]` recursivamente.
+- `TareaRecurrente::toArray()` — llama `parent::toArray()` y agrega `periodicidad`.
+- `App\Reportes\ExportadorJson` — `exportar(Tablero, string): void` serializa `$tablero->obtenerTareas()` con `array_map` + `toArray()` (sin `instanceof`) y escribe con `json_encode(..., JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)`. `importar(string): array` lee el JSON y devuelve datos crudos (pensado para el entregable final, cuando se reconstruyan objetos).
+- El archivo generado en la demo (`export/tablero.json`) no se versiona (ver `.gitignore`).
 
 ### 🔮 Para el entregable final (no priorizar ahora)
 
@@ -292,9 +301,9 @@ Referencia para explicar el trabajo incremental en la exposición:
 
 ### Al implementar nuevas clases
 
-- **`TareaRecurrente`:** extender `TareaBase`, implementar `calcularAvance()` y `obtenerEstado()`. La lógica propia va en el recálculo de `$fechaVencimiento` según periodicidad. Como `fechaVencimiento` es `readonly`, evaluar si la periodicidad requiere un campo adicional (ej. `$proximaFecha`) o un rediseño mínimo — documentar la decisión.
-- **`Tablero`:** recibir/agregar `TareaInterface[]`, método para agrupar por `EstadoTarea`, sin condicionales por tipo. Integrar en `main.php` para la demo.
-- **Exportación JSON:** preferir `App\Reportes\ExportadorJson` o método `exportarJson()` en `Tablero`. Usar `json_encode` nativo de PHP.
+- **`TareaRecurrente`** (✅ implementada): extiende `TareaBase`. Como `fechaVencimiento` es `readonly` en la base, la fecha vigente vive en `$proximaFecha` (campo propio) y se recorre en `completarCiclo()`.
+- **`Tablero`** (✅ implementado): agrupa `TareaInterface[]` por `EstadoTarea` sin condicionales por tipo. Integrado en `main.php`.
+- **Exportación JSON** (✅ implementado): `App\Reportes\ExportadorJson`, con `toArray()` agregado a `TareaInterface` para que cada tarea se serialice a sí misma (ver §5). Usa `json_encode`/`json_decode` nativos de PHP.
 
 ### Lo que NO debes hacer
 
@@ -328,8 +337,9 @@ La salida debe ejecutarse sin errores. Si se agregó validación nueva, confirma
 
 ## 13. Próximos pasos recomendados (orden sugerido)
 
-1. **`feature/tablero`** — desbloquea el criterio de Polimorfismo (14 pts).
-2. **`feature/tarea-recurrente`** — completa el modelo de clases de la propuesta.
-3. **`feature/exportacion-archivo`** — cumple manejo de archivos (implementación o diseño documentado).
-4. Actualizar `main.php` para demostrar Tablero + exportación en la exposición.
-5. Ensayo de presentación (10 min): GitHub → código → terminal en vivo.
+1. ~~`feature/tablero`~~ — ✅ hecho, desbloqueó el criterio de Polimorfismo (14 pts).
+2. ~~`feature/tarea-recurrente`~~ — ✅ hecho, completa el modelo de clases de la propuesta.
+3. ~~`feature/exportacion-archivo`~~ — ✅ hecho, cumple manejo de archivos con implementación real (`ExportadorJson` + `toArray()`).
+4. ~~Actualizar `main.php` para demostrar Tablero + exportación en la exposición.~~ — ✅ hecho.
+5. Abrir PR de `feature/exportacion-archivo` hacia `dev` (pendiente: revisar y mergear).
+6. Ensayo de presentación (10 min): GitHub → código → terminal en vivo.
