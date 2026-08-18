@@ -8,6 +8,12 @@ use App\Contratos\TareaInterface;
 use App\Estado\EstadoTarea;
 use DateTimeImmutable;
 
+/**
+ * Tarea compuesta que agrupa subtareas mediante el patrón Composite.
+ *
+ * Su avance es el promedio del avance de todas sus subtareas, calculado
+ * polimórficamente a través de TareaInterface.
+ */
 final class TareaCompuesta extends TareaBase
 {
     /** @var TareaInterface[] */
