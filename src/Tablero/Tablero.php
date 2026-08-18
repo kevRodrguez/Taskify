@@ -7,6 +7,12 @@ namespace App\Tablero;
 use App\Contratos\TareaInterface;
 use App\Estado\EstadoTarea;
 
+/**
+ * Tablero que agrupa tareas heterogéneas por su estado actual.
+ *
+ * Recorre un arreglo de TareaInterface y delega en cada tarea el cálculo
+ * de su estado, sin usar instanceof ni condicionales por tipo concreto.
+ */
 final class Tablero
 {
     /** @var TareaInterface[] */
@@ -28,7 +34,7 @@ final class Tablero
     /**
      * Agrupa las tareas por su estado actual usando el contrato polimórfico.
      *
-     * @return array<string, TareaInterface[]>
+     * @return array<string, TareaInterface[]> Clave = nombre del estado, valor = tareas en ese estado.
      */
     public function agruparPorEstado(): array
     {
@@ -43,6 +49,8 @@ final class Tablero
     }
 
     /**
+     * Igual que agruparPorEstado(), pero ordenado: Pendiente → En progreso → Completada.
+     *
      * @return array<string, TareaInterface[]>
      */
     public function agruparPorEstadoOrdenado(): array

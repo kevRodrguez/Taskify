@@ -9,6 +9,12 @@ use App\Estado\EstadoTarea;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
+/**
+ * Clase abstracta con los atributos y comportamiento compartido por todas las tareas.
+ *
+ * Encapsula título, descripción y fecha de vencimiento. Las subclases concretas
+ * definen cómo calcular el avance y el estado.
+ */
 abstract class TareaBase implements TareaInterface
 {
     private string $titulo;
@@ -27,6 +33,9 @@ abstract class TareaBase implements TareaInterface
         return $this->titulo;
     }
 
+    /**
+     * @throws InvalidArgumentException Si el título está vacío.
+     */
     public function setTitulo(string $titulo): void
     {
         if (trim($titulo) === '') {
@@ -55,6 +64,7 @@ abstract class TareaBase implements TareaInterface
 
     abstract public function obtenerEstado(): EstadoTarea;
 
+    /** Traduce un porcentaje de avance al estado correspondiente. */
     protected function determinarEstadoPorAvance(float $avance): EstadoTarea
     {
         return match (true) {

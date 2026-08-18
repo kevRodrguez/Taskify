@@ -8,6 +8,9 @@ use App\Estado\EstadoTarea;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
+/**
+ * Tarea con avance manual definido por el usuario (0% a 100%).
+ */
 final class TareaSimple extends TareaBase
 {
     private float $avance;
@@ -22,6 +25,9 @@ final class TareaSimple extends TareaBase
         $this->setAvance($avance);
     }
 
+    /**
+     * @throws InvalidArgumentException Si el avance está fuera del rango 0–100.
+     */
     public function setAvance(float $avance): void
     {
         if ($avance < 0.0 || $avance > 100.0) {
