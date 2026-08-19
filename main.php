@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
+use App\Reportes\ExportadorJson;
 use App\Tablero\Tablero;
 use App\Tareas\TareaCompuesta;
 use App\Tareas\Periodicidad;
@@ -131,3 +132,24 @@ echo "Ciclo 1: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (febrero
 $cierreMensual->setAvance(100.0);
 $cierreMensual->completarCiclo();
 echo "Ciclo 2: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (marzo, se recupera el día 31)" . PHP_EOL;
+
+try {
+    new TareaSimple('', 'Sin título', new DateTimeImmutable());
+} catch (InvalidArgumentException $e) {
+    echo "Excepción capturada: {$e->getMessage()}" . PHP_EOL;
+}
+
+echo PHP_EOL . '=== Manejo de archivos: exportar tablero a JSON ===' . PHP_EOL;
+
+$rutaExportacion = __DIR__ . '/export/tablero.json';
+if (!is_dir(__DIR__ . '/export')) {
+    mkdir(__DIR__ . '/export');
+}
+
+$exportador = new ExportadorJson();
+$exportador->exportar($tablero, $rutaExportacion);
+echo "Tablero exportado en: {$rutaExportacion}" . PHP_EOL;
+
+$datosImportados = $exportador->importar($rutaExportacion);
+printf('Tareas leídas de vuelta desde el archivo: %d' . PHP_EOL, count($datosImportados));
+echo 'Primer registro crudo: ' . json_encode($datosImportados[0], JSON_UNESCAPED_UNICODE) . PHP_EOL;

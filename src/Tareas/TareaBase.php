@@ -73,4 +73,22 @@ abstract class TareaBase implements TareaInterface
             default => EstadoTarea::EN_PROGRESO,
         };
     }
+
+    /**
+     * Representación base común a toda tarea. Las subclases con datos propios
+     * (ej. TareaCompuesta, TareaRecurrente) llaman parent::toArray() y agregan
+     * sus claves adicionales en lugar de reescribir los campos comunes.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'titulo' => $this->getTitulo(),
+            'descripcion' => $this->getDescripcion(),
+            'fechaVencimiento' => $this->getFechaVencimiento()->format('Y-m-d'),
+            'avance' => $this->calcularAvance(),
+            'estado' => $this->obtenerEstado()->value,
+        ];
+    }
 }
