@@ -11,6 +11,17 @@ use App\Tareas\Periodicidad;
 use App\Tareas\TareaRecurrente;
 use App\Tareas\TareaSimple;
 
+/** Rellena con espacios contando caracteres (no bytes), para que tildes/ñ no desalineen columnas. */
+function pad(string $texto, int $ancho): string
+{
+    return $texto . str_repeat(' ', max(0, $ancho - mb_strlen($texto)));
+}
+
+function seccion(string $titulo): string
+{
+    return PHP_EOL . "=== {$titulo} ===" . PHP_EOL;
+}
+
 $disenoUI = new TareaSimple(
     'Diseñar wireframes de la GUI',
     'Bocetar las pantallas principales del tablero',
@@ -64,23 +75,31 @@ $tablero->agregarTarea($moduloFrontend);
 $tablero->agregarTarea($reunionSemanal);
 $tablero->agregarTarea($backupDiario);
 
-echo '=== Tablero de tareas (Taskify) ===' . PHP_EOL;
+echo seccion('Tablero de tareas (Taskify)');
 
 foreach ($tablero->agruparPorEstadoOrdenado() as $estado => $tareasDelEstado) {
     echo PHP_EOL . "[{$estado}]" . PHP_EOL;
+    echo '  ' . pad('Título', 34) . pad('Avance', 9) . 'Vence' . PHP_EOL;
+    echo '  ' . str_repeat('-', 58) . PHP_EOL;
 
     foreach ($tareasDelEstado as $tarea) {
-        printf(
-            '- %-32s | Avance: %5.1f%%' . PHP_EOL,
-            $tarea->getTitulo(),
-            $tarea->calcularAvance()
-        );
+        echo '  '
+            . pad($tarea->getTitulo(), 34)
+            . pad(sprintf('%5.1f%%', $tarea->calcularAvance()), 9)
+            . $tarea->getFechaVencimiento()->format('Y-m-d')
+            . PHP_EOL;
     }
 }
 
-echo PHP_EOL . '=== Validación de encapsulamiento (demo en vivo) ===' . PHP_EOL;
+echo seccion('Validación de encapsulamiento (demo en vivo)');
 
-echo PHP_EOL . "=== Recurrencia: completar ciclo ===" . PHP_EOL;
+try {
+    new TareaSimple('', 'Sin título', new DateTimeImmutable());
+} catch (InvalidArgumentException $e) {
+    echo "Excepción capturada: {$e->getMessage()}" . PHP_EOL;
+}
+
+echo seccion('Recurrencia: completar ciclo');
 printf(
     'Antes:  %s | Periodicidad: %s | Vence: %s | Avance: %.1f%% | Estado: %s' . PHP_EOL,
     $backupDiario->getTitulo(),
@@ -106,7 +125,7 @@ $cierreMensual = new TareaRecurrente(
     Periodicidad::MENSUAL,
     100.0
 );
-echo PHP_EOL . "=== Recurrencia mensual (día 31 sin desbordar a marzo) ===" . PHP_EOL;
+echo seccion('Recurrencia mensual (día 31 sin desbordar a marzo)');
 echo "Ancla: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')}" . PHP_EOL;
 $cierreMensual->completarCiclo();
 echo "Ciclo 1: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')} (febrero, último día válido)" . PHP_EOL;
