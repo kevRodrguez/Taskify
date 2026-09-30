@@ -123,7 +123,8 @@ $cierreMensual = new TareaRecurrente(
     'Conciliar movimientos al último día del mes',
     new DateTimeImmutable('2026-01-31'),
     Periodicidad::MENSUAL,
-    100.0
+    100.0,
+    new DateTimeImmutable('2026-01-01')
 );
 echo seccion('Recurrencia mensual (día 31 sin desbordar a marzo)');
 echo "Ancla: {$cierreMensual->getFechaVencimiento()->format('Y-m-d')}" . PHP_EOL;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tareas;
 
 use App\Estado\EstadoTarea;
+use App\Exceptions\DominioException;
 use DateTimeImmutable;
-use InvalidArgumentException;
 
 /**
  * La fecha de TareaBase es readonly (ancla de la serie).
@@ -14,6 +14,8 @@ use InvalidArgumentException;
  */
 final class TareaRecurrente extends TareaBase
 {
+    public const TIPO = 'recurrente';
+
     private float $avance;
     private DateTimeImmutable $proximaFecha;
 
@@ -22,9 +24,10 @@ final class TareaRecurrente extends TareaBase
         string $descripcion,
         DateTimeImmutable $fechaVencimiento,
         private readonly Periodicidad $periodicidad,
-        float $avance = 0.0
+        float $avance = 0.0,
+        ?DateTimeImmutable $fechaCreacion = null
     ) {
-        parent::__construct($titulo, $descripcion, $fechaVencimiento);
+        parent::__construct($titulo, $descripcion, $fechaVencimiento, $fechaCreacion);
         $this->proximaFecha = $fechaVencimiento;
         $this->setAvance($avance);
     }
@@ -39,19 +42,21 @@ final class TareaRecurrente extends TareaBase
         return $this->periodicidad;
     }
 
+    /**
+     * @throws DominioException Si el avance está fuera del rango 0–100.
+     */
     public function setAvance(float $avance): void
     {
-        if ($avance < 0.0 || $avance > 100.0) {
-            throw new InvalidArgumentException('El avance debe estar entre 0 y 100.');
-        }
-
-        $this->avance = $avance;
+        $this->avance = self::validarAvance($avance);
     }
 
+    /**
+     * @throws DominioException Si el ciclo aún no está completo.
+     */
     public function completarCiclo(): void
     {
         if ($this->calcularAvance() < 100.0) {
-            throw new InvalidArgumentException(
+            throw new DominioException(
                 'Solo se puede avanzar la fecha cuando el ciclo está completo (avance 100).'
             );
         }
@@ -70,6 +75,11 @@ final class TareaRecurrente extends TareaBase
         return $this->determinarEstadoPorAvance($this->calcularAvance());
     }
 
+    public static function etiquetaTipo(): string
+    {
+        return 'Recurrente';
+    }
+
     /**
      * Extiende la representación base agregando la periodicidad propia de esta tarea.
      *
@@ -79,6 +89,67 @@ final class TareaRecurrente extends TareaBase
     {
         return parent::toArray() + [
             'periodicidad' => $this->periodicidad->value,
+        ];
+    }
+
+    /**
+     * Se persiste la fecha vigente (no el ancla), que es la que ve el usuario.
+     *
+     * @return array<string, mixed>
+     */
+    public function aFila(): array
+    {
+        return array_merge(parent::aFila(), [
+            'avance' => (int) round($this->avance),
+            'periodicidad' => $this->periodicidad->value,
+        ]);
+    }
+
+    /** @param array<string, mixed> $datos */
+    public static function desdeArray(array $datos): static
+    {
+        [$titulo, $descripcion, $vencimiento, $creacion, $id, $imagen] = self::datosComunes($datos);
+
+        $periodicidad = Periodicidad::tryFrom((string) ($datos['periodicidad'] ?? ''));
+        if ($periodicidad === null) {
+            throw new DominioException('La periodicidad debe ser Diaria, Semanal o Mensual.');
+        }
+
+        $avance = self::avanceDesdeTexto($datos['avance'] ?? 0);
+
+        return self::completar(
+            new self($titulo, $descripcion, $vencimiento, $periodicidad, $avance, $creacion),
+            $id,
+            $imagen
+        );
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function camposEspecificos(): array
+    {
+        $opciones = [];
+        foreach (Periodicidad::cases() as $caso) {
+            $opciones[$caso->value] = $caso->value;
+        }
+
+        return [
+            [
+                'nombre' => 'periodicidad',
+                'etiqueta' => 'Periodicidad',
+                'tipo' => 'select',
+                'opciones' => $opciones,
+                'requerido' => true,
+            ],
+            self::campoAvance(),
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function detalleEspecifico(): array
+    {
+        return [
+            'Periodicidad' => $this->periodicidad->value,
+            'Próximo vencimiento' => $this->proximaFecha->format('Y-m-d'),
         ];
     }
 
