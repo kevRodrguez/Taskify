@@ -132,7 +132,13 @@ abstract class TareaBase implements TareaInterface
 
     abstract public function obtenerEstado(): EstadoTarea;
 
-    abstract public function tipoLegible(): string;
+    /** Etiqueta legible del tipo (ej. "Recurrente"); la define cada clase concreta. */
+    abstract public static function etiquetaTipo(): string;
+
+    public function tipoLegible(): string
+    {
+        return static::etiquetaTipo();
+    }
 
     /**
      * Fila con las columnas comunes; `avance` y `periodicidad` quedan en null y

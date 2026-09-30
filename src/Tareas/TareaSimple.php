@@ -46,7 +46,7 @@ final class TareaSimple extends TareaBase
         return $this->determinarEstadoPorAvance($this->calcularAvance());
     }
 
-    public function tipoLegible(): string
+    public static function etiquetaTipo(): string
     {
         return 'Simple';
     }

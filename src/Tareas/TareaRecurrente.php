@@ -75,7 +75,7 @@ final class TareaRecurrente extends TareaBase
         return $this->determinarEstadoPorAvance($this->calcularAvance());
     }
 
-    public function tipoLegible(): string
+    public static function etiquetaTipo(): string
     {
         return 'Recurrente';
     }
