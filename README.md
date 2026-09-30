@@ -18,6 +18,22 @@ composer dump-autoload
 php main.php
 ```
 
+## Instalación web (Fase 2)
+
+Requisitos adicionales: MySQL o MariaDB con la extensión `pdo_mysql` de PHP.
+
+```bash
+git clone https://github.com/kevRodrguez/Taskify.git
+cd Taskify
+composer install
+cp config/config.example.php config/config.php   # editar usuario y clave de tu MySQL
+mysql -u root -p < database/schema.sql
+mysql -u root -p < database/seed.sql
+php -S localhost:8000 -t public
+```
+
+`config/config.php` contiene credenciales reales y no se sube al repositorio; solo se comparte `config/config.example.php`.
+
 ## Estructura del proyecto
 
 ```
