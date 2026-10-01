@@ -480,6 +480,31 @@ textarea {
     margin: 0.1rem 0 0;
 }
 
+.imagen-actual {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.imagen-actual figcaption,
+.ayuda {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+}
+
+.vista-previa {
+    width: 6rem;
+    height: 6rem;
+    object-fit: cover;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-linea);
+}
+
+.vista-previa[hidden] {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .ficha {
         grid-template-columns: minmax(0, 1fr);
