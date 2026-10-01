@@ -14,9 +14,9 @@ use finfo;
  * las páginas usan public/uploads y las pruebas un directorio temporal, sin
  * cambiar una línea de esta clase.
  *
- * [ENCAPSULAMIENTO] las reglas (tamaño y tipos permitidos) son constantes
- * privadas; quien usa el servicio solo ve guardar/reemplazar/eliminar y recibe
- * un nombre de archivo o una ImagenException.
+ * [ENCAPSULAMIENTO] las reglas (tamaño, tipos permitidos, formato del nombre)
+ * son constantes privadas; quien usa el servicio solo ve guardar/reemplazar/
+ * eliminar/urlPublica y recibe un nombre de archivo o una ImagenException.
  */
 final class GestorImagenes
 {
@@ -36,6 +36,12 @@ final class GestorImagenes
         'image/png' => IMAGETYPE_PNG,
         'image/webp' => IMAGETYPE_WEBP,
     ];
+
+    /** Formato de los nombres que genera guardar(): 32 hex + extensión permitida. */
+    private const PATRON_NOMBRE = '/^[a-f0-9]{32}\.(jpg|png|webp)$/';
+
+    private const URL_CARGAS = '/uploads/';
+    private const URL_POR_DEFECTO = '/img/sin-imagen.svg';
 
     private readonly string $directorio;
 
@@ -73,6 +79,10 @@ final class GestorImagenes
     }
 
     /**
+     * Guarda la imagen nueva y, solo si se guardó bien, borra la anterior.
+     *
+     * Si la nueva falla se lanza la excepción y la anterior queda intacta.
+     *
      * @param array<string, mixed> $archivo
      * @throws ImagenException
      */
@@ -84,16 +94,41 @@ final class GestorImagenes
         return $nueva;
     }
 
+    /**
+     * Borra una imagen del directorio de cargas. No hace nada si no existe.
+     */
     public function eliminar(?string $nombre): void
     {
-        if ($nombre === null || $nombre === '') {
+        $nombreSeguro = $this->nombreSeguro($nombre);
+        if ($nombreSeguro === null) {
             return;
         }
 
-        $ruta = $this->ruta(basename($nombre));
+        $ruta = $this->ruta($nombreSeguro);
         if (is_file($ruta)) {
             unlink($ruta);
         }
+    }
+
+    /** Indica si la tarea tiene una imagen guardada que realmente existe en disco. */
+    public function existe(?string $nombre): bool
+    {
+        $nombreSeguro = $this->nombreSeguro($nombre);
+
+        return $nombreSeguro !== null && is_file($this->ruta($nombreSeguro));
+    }
+
+    /**
+     * URL pública de la imagen, o la imagen por defecto si no hay o no existe.
+     */
+    public function urlPublica(?string $nombre): string
+    {
+        $nombreSeguro = $this->nombreSeguro($nombre);
+        if ($nombreSeguro === null || !is_file($this->ruta($nombreSeguro))) {
+            return self::URL_POR_DEFECTO;
+        }
+
+        return self::URL_CARGAS . rawurlencode($nombreSeguro);
     }
 
     /**
@@ -191,6 +226,21 @@ final class GestorImagenes
             error_log('GestorImagenes: directorio no disponible: ' . $this->directorio);
             throw new ImagenException('No se pudo guardar la imagen en el servidor.');
         }
+    }
+
+    /**
+     * [SEGURIDAD] basename() descarta cualquier "../" y el patrón solo deja pasar
+     * nombres generados por guardar(): no se puede leer ni borrar otro archivo.
+     */
+    private function nombreSeguro(?string $nombre): ?string
+    {
+        if ($nombre === null || $nombre === '') {
+            return null;
+        }
+
+        $base = basename($nombre);
+
+        return preg_match(self::PATRON_NOMBRE, $base) === 1 ? $base : null;
     }
 
     private function ruta(string $nombre): string
