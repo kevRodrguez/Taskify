@@ -444,3 +444,48 @@ textarea {
         padding: 0.55rem;
     }
 }
+
+/* Ficha de una tarea (public/tareas/ver.php) */
+.ficha {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 1rem 1.5rem;
+    align-items: start;
+}
+
+.ficha h2 {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.imagen-ficha {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--color-fondo);
+}
+
+.ficha-datos {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.ficha-datos dt {
+    font-size: 0.9rem;
+    color: var(--color-texto-suave);
+}
+
+.ficha-datos dd {
+    margin: 0.1rem 0 0;
+}
+
+@media (max-width: 768px) {
+    .ficha {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .imagen-ficha {
+        max-width: 12rem;
+    }
+}
