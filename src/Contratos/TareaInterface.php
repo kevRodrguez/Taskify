@@ -80,6 +80,16 @@ interface TareaInterface
      */
     public static function camposEspecificos(): array;
 
+    /** Indica si esta tarea puede contener subtareas (Composite). */
+    public function admiteSubtareas(): bool;
+
+    /**
+     * Agrega una subtarea; las tareas que no admiten subtareas lanzan DominioException.
+     *
+     * @throws \App\Exceptions\DominioException
+     */
+    public function agregarSubtarea(self $subtarea): void;
+
     /**
      * Pares etiqueta => valor con los datos propios de este tipo para la ficha.
      *
