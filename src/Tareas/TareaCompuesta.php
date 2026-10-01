@@ -30,6 +30,11 @@ final class TareaCompuesta extends TareaBase
         parent::__construct($titulo, $descripcion, $fechaVencimiento, $fechaCreacion);
     }
 
+    public function admiteSubtareas(): bool
+    {
+        return true;
+    }
+
     public function agregarSubtarea(TareaInterface $subtarea): void
     {
         $this->subtareas[] = $subtarea;

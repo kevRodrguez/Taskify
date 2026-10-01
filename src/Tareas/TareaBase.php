@@ -160,6 +160,19 @@ abstract class TareaBase implements TareaInterface
         ];
     }
 
+    public function admiteSubtareas(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @throws DominioException Siempre: solo TareaCompuesta lo sobrescribe.
+     */
+    public function agregarSubtarea(TareaInterface $subtarea): void
+    {
+        throw new DominioException('Solo las tareas compuestas pueden tener subtareas.');
+    }
+
     /** @return list<array<string, mixed>> */
     public static function camposEspecificos(): array
     {
