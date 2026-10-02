@@ -41,7 +41,7 @@ final class Tablero
         $agrupadas = [];
 
         foreach ($this->tareas as $tarea) {
-            $estado = $tarea->obtenerEstado()->value;
+            $estado = $tarea->obtenerEstado()->value; // [POLIMORFISMO] sin instanceof ni switch por tipo
             $agrupadas[$estado][] = $tarea;
         }
 

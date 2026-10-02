@@ -14,7 +14,7 @@ use DateTimeImmutable;
  * Su avance es el promedio del avance de todas sus subtareas, calculado
  * polimórficamente a través de TareaInterface.
  */
-final class TareaCompuesta extends TareaBase
+final class TareaCompuesta extends TareaBase // [HERENCIA] [COMPOSICION] contiene TareaInterface[] (Composite)
 {
     public const TIPO = 'compuesta';
 
@@ -56,7 +56,7 @@ final class TareaCompuesta extends TareaBase
 
         $sumaAvances = 0.0;
         foreach ($this->subtareas as $subtarea) {
-            $sumaAvances += $subtarea->calcularAvance();
+            $sumaAvances += $subtarea->calcularAvance(); // [POLIMORFISMO] cada subtarea calcula a su manera
         }
 
         return $sumaAvances / count($this->subtareas);

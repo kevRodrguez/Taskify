@@ -12,7 +12,7 @@ use DateTimeImmutable;
  * La fecha de TareaBase es readonly (ancla de la serie).
  * La fecha vigente se guarda en $proximaFecha y se recorre al completar un ciclo.
  */
-final class TareaRecurrente extends TareaBase
+final class TareaRecurrente extends TareaBase // [HERENCIA] reutiliza TareaBase y agrega periodicidad
 {
     public const TIPO = 'recurrente';
 

@@ -13,7 +13,7 @@ use DateTimeImmutable;
  * Permite que el Tablero interactúe con tareas simples, compuestas o recurrentes
  * sin conocer su implementación concreta.
  */
-interface TareaInterface
+interface TareaInterface // [INTERFAZ] [ABSTRACCION] contrato polimórfico que consumen repositorios, vistas y Tablero
 {
     /** Calcula el porcentaje de avance de la tarea (0.0 a 100.0). */
     public function calcularAvance(): float;

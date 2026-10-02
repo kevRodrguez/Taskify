@@ -37,7 +37,7 @@ $mensajeVacio = $mensajeVacio ?? 'No hay tareas para mostrar.';
                 <?php
                 $titulo = $tarea->getTitulo();
                 $avance = max(0.0, min(100.0, $tarea->calcularAvance()));
-                $estado = $tarea->obtenerEstado();
+                $estado = $tarea->obtenerEstado(); // [POLIMORFISMO] la vista no distingue tipos
                 $claseBadge = 'badge badge-' . strtolower(str_replace('_', '-', $estado->name));
                 $nombreImagen = $tarea->getImagen();
                 if (is_string($nombreImagen) && $nombreImagen !== '') {

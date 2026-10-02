@@ -18,13 +18,13 @@ use DateTimeImmutable;
  * Invariantes del dominio: título no vacío, avance entre 0 y 100 y fecha de
  * vencimiento no anterior a la de creación.
  */
-abstract class TareaBase implements TareaInterface
+abstract class TareaBase implements TareaInterface // [ABSTRACCION] clase abstracta con lo común y métodos abstractos
 {
     /** Longitud máxima del título (columna VARCHAR(120)). */
     public const TITULO_MAX = 120;
 
     private ?int $id = null;
-    private string $titulo;
+    private string $titulo; // [ENCAPSULAMIENTO] privado: solo cambia mediante setTitulo(), que valida
     private string $descripcion;
     private ?string $imagen = null;
     private readonly DateTimeImmutable $fechaCreacion;

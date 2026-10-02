@@ -11,7 +11,7 @@ use DateTimeImmutable;
 /**
  * Tarea con avance manual definido por el usuario (0% a 100%).
  */
-final class TareaSimple extends TareaBase
+final class TareaSimple extends TareaBase // [HERENCIA] reutiliza TareaBase vía parent::__construct()
 {
     public const TIPO = 'simple';
 
