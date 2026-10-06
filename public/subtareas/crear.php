@@ -7,7 +7,6 @@ require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 use App\Database\Conexion;
 use App\Exceptions\ConexionException;
 use App\Repositories\SubtareaRepositorio;
-use App\Tareas\ReglasSubtarea;
 use App\Validation\Flash;
 
 $raiz = dirname(__DIR__, 2);
@@ -28,11 +27,11 @@ if ($tareaId === false || $tareaId === null || $tareaId <= 0) {
 
     try {
         $repo = new SubtareaRepositorio(Conexion::obtener());
-        $padre = $repo->datosPadre($tareaId);
+        $padre = $repo->buscarTarea($tareaId);
 
         if ($padre === null) {
             $errorCarga = 'No se encontró la tarea indicada.';
-        } elseif (!ReglasSubtarea::padreAceptaSubtareas($padre['tipo'])) {
+        } elseif (!$padre->admiteSubtareas()) {
             $errorCarga = 'Solo las tareas compuestas pueden tener subtareas.';
         } else {
             $candidatas = $repo->listarCandidatas($tareaId);
@@ -56,15 +55,15 @@ require $raiz . '/views/layout/encabezado.php';
             <p class="alerta-error" role="alert"><?= e($errorCarga) ?></p>
             <p><a class="btn btn-secundario" href="/tareas/index.php">Volver al listado de tareas</a></p>
         <?php else: ?>
-            <p class="lead">Tarea compuesta: <strong><?= e($padre['titulo']) ?></strong></p>
+            <p class="lead">Tarea compuesta: <strong><?= e($padre->getTitulo()) ?></strong></p>
 
             <?php if ($candidatas === []): ?>
                 <p class="alerta-error" role="alert">No hay tareas disponibles para asignar como subtarea.</p>
-                <p><a class="btn btn-secundario" href="/subtareas/index.php?tarea_id=<?= e((string) $padre['id']) ?>">Volver al listado de subtareas</a></p>
+                <p><a class="btn btn-secundario" href="/subtareas/index.php?tarea_id=<?= e((string) $padre->getId()) ?>">Volver al listado de subtareas</a></p>
             <?php else: ?>
-                <form class="formulario" method="post" action="/subtareas/guardar.php" novalidate>
+                <form class="formulario" method="post" action="/subtareas/guardar.php">
                     <input type="hidden" name="_csrf" value="<?= e(\App\Validation\Csrf::token()) ?>">
-                    <input type="hidden" name="tarea_padre_id" value="<?= e((string) $padre['id']) ?>">
+                    <input type="hidden" name="tarea_padre_id" value="<?= e((string) $padre->getId()) ?>">
 
                     <div class="campo">
                         <label for="tarea_hija_id">Tarea a asignar como subtarea</label>
@@ -88,7 +87,7 @@ require $raiz . '/views/layout/encabezado.php';
 
                     <p>
                         <button class="btn" type="submit">Asignar subtarea</button>
-                        <a class="btn btn-secundario" href="/subtareas/index.php?tarea_id=<?= e((string) $padre['id']) ?>">Cancelar</a>
+                        <a class="btn btn-secundario" href="/subtareas/index.php?tarea_id=<?= e((string) $padre->getId()) ?>">Cancelar</a>
                     </p>
                 </form>
             <?php endif; ?>

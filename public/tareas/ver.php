@@ -41,16 +41,6 @@ $avanceTexto = rtrim(rtrim(number_format($avance, 1, '.', ''), '0'), '.');
 $estado = $tarea->obtenerEstado();
 $claseBadge = 'badge badge-' . strtolower(str_replace('_', '-', $estado->name));
 
-$nombreImagen = $tarea->getImagen();
-if (is_string($nombreImagen) && $nombreImagen !== '') {
-    // basename evita que un nombre guardado salga del directorio de cargas.
-    $srcImagen = '/uploads/' . rawurlencode(basename($nombreImagen));
-    $altImagen = 'Imagen de ' . $tarea->getTitulo();
-} else {
-    $srcImagen = '/img/sin-imagen.svg';
-    $altImagen = 'Sin imagen para ' . $tarea->getTitulo();
-}
-
 $tituloPagina = $tarea->getTitulo();
 require $raiz . '/views/layout/encabezado.php';
 ?>
@@ -58,7 +48,13 @@ require $raiz . '/views/layout/encabezado.php';
 
         <section class="bloque ficha" aria-labelledby="titulo-ficha">
             <h2 id="titulo-ficha">Ficha de la tarea</h2>
-            <img class="imagen-ficha" src="<?= e($srcImagen) ?>" alt="<?= e($altImagen) ?>">
+            <?php
+            $imagenNombre = $tarea->getImagen();
+            $imagenTitulo = $tarea->getTitulo();
+            $imagenClase = 'imagen-ficha';
+            $imagenTamano = null;
+            require $raiz . '/views/partials/imagen.php';
+            ?>
             <dl class="ficha-datos">
                 <div>
                     <dt>Tipo</dt>

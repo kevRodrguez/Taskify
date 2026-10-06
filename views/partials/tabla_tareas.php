@@ -39,21 +39,18 @@ $mensajeVacio = $mensajeVacio ?? 'No hay tareas para mostrar.';
                 $avance = max(0.0, min(100.0, $tarea->calcularAvance()));
                 $estado = $tarea->obtenerEstado(); // [POLIMORFISMO] la vista no distingue tipos
                 $claseBadge = 'badge badge-' . strtolower(str_replace('_', '-', $estado->name));
-                $nombreImagen = $tarea->getImagen();
-                if (is_string($nombreImagen) && $nombreImagen !== '') {
-                    // basename evita que un nombre guardado salga del directorio de cargas.
-                    $srcImagen = '/uploads/' . rawurlencode(basename($nombreImagen));
-                    $altImagen = 'Imagen de ' . $titulo;
-                } else {
-                    $srcImagen = '/img/sin-imagen.svg';
-                    $altImagen = 'Sin imagen para ' . $titulo;
-                }
                 $id = $tarea->getId();
                 $avanceTexto = rtrim(rtrim(number_format($avance, 1, '.', ''), '0'), '.');
                 ?>
                 <tr>
                     <td>
-                        <img class="miniatura" src="<?= e($srcImagen) ?>" alt="<?= e($altImagen) ?>" width="48" height="48">
+                        <?php
+                        $imagenNombre = $tarea->getImagen();
+                        $imagenTitulo = $titulo;
+                        $imagenClase = 'miniatura';
+                        $imagenTamano = 48;
+                        require __DIR__ . '/imagen.php';
+                        ?>
                     </td>
                     <td><?= e($titulo) ?></td>
                     <td><?= e($tarea->tipoLegible()) ?></td>

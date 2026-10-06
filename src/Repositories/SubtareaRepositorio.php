@@ -29,14 +29,14 @@ final class SubtareaRepositorio
     {
         ReglasSubtarea::exigirPadreDistintoDeHija($padreId, $hijaId);
 
-        $tipoPadre = $this->obtenerTipo($padreId);
-        if ($tipoPadre === null) {
+        $padre = $this->buscarTarea($padreId);
+        if ($padre === null) {
             throw new DominioException('La tarea padre no existe.');
         }
 
-        ReglasSubtarea::exigirPadreCompuesto($tipoPadre);
+        ReglasSubtarea::exigirPadreAdmiteSubtareas($padre);
 
-        if ($this->obtenerTipo($hijaId) === null) {
+        if ($this->buscarTarea($hijaId) === null) {
             throw new DominioException('La tarea hija no existe.');
         }
 
@@ -97,26 +97,18 @@ final class SubtareaRepositorio
     }
 
     /**
-     * Datos mínimos del padre para las vistas de subtareas.
+     * [CRUD-READ] Una tarea por id (sin cargar sus subtareas), o null si no existe.
      *
-     * @return array{id: int, titulo: string, tipo: string}|null
+     * Las vistas de subtareas la usan para mostrar el padre y preguntarle
+     * admiteSubtareas() en lugar de revisar su tipo.
      */
-    public function datosPadre(int $padreId): ?array
+    public function buscarTarea(int $id): ?TareaInterface
     {
-        $sql = 'SELECT id, titulo, tipo FROM tareas WHERE id = :id LIMIT 1';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['id' => $padreId]);
+        $stmt = $this->pdo->prepare('SELECT * FROM tareas WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
         $fila = $stmt->fetch();
 
-        if ($fila === false) {
-            return null;
-        }
-
-        return [
-            'id' => (int) $fila['id'],
-            'titulo' => (string) $fila['titulo'],
-            'tipo' => (string) $fila['tipo'],
-        ];
+        return $fila === false ? null : TareaFactory::desdeFila($fila);
     }
 
     /**
@@ -146,15 +138,6 @@ final class SubtareaRepositorio
         }
 
         return $candidatas;
-    }
-
-    private function obtenerTipo(int $id): ?string
-    {
-        $stmt = $this->pdo->prepare('SELECT tipo FROM tareas WHERE id = :id LIMIT 1');
-        $stmt->execute(['id' => $id]);
-        $fila = $stmt->fetch();
-
-        return $fila === false ? null : (string) $fila['tipo'];
     }
 
     private function yaEsSubtarea(int $padreId, int $hijaId): bool

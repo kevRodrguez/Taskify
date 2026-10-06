@@ -51,7 +51,7 @@ $tareaPadreId = $tareaPadreId ?? 0;
                     <td><span class="<?= e($claseBadge) ?>"><?= e($estado->value) ?></span></td>
                     <td>
                         <?php if (is_int($hijaId)): ?>
-                            <span class="acciones">
+                            <div class="acciones">
                                 <a class="btn btn-secundario" href="/tareas/ver.php?id=<?= e((string) $hijaId) ?>">Ver</a>
                                 <form method="post" action="/subtareas/eliminar.php">
                                     <input type="hidden" name="_csrf" value="<?= e(\App\Validation\Csrf::token()) ?>">
@@ -59,7 +59,7 @@ $tareaPadreId = $tareaPadreId ?? 0;
                                     <input type="hidden" name="tarea_hija_id" value="<?= e((string) $hijaId) ?>">
                                     <button class="btn btn-peligro" type="submit">Quitar</button>
                                 </form>
-                            </span>
+                            </div>
                         <?php else: ?>
                             No disponible
                         <?php endif; ?>

@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace App\Tareas;
 
+use App\Contratos\TareaInterface;
 use App\Exceptions\DominioException;
 
 /**
  * Reglas de negocio para la relación compuesta → subtarea.
  *
- * Valida en el dominio (sin instanceof en vistas) que solo las tareas
- * compuestas acepten subtareas y que padre e hija sean distintas.
+ * Valida en el dominio (sin instanceof ni comparar el tipo) que solo las
+ * tareas que admiten subtareas las reciban y que padre e hija sean distintas.
  */
 final class ReglasSubtarea
 {
-    public static function padreAceptaSubtareas(string $tipoPadre): bool
-    {
-        return $tipoPadre === TareaCompuesta::TIPO;
-    }
-
     /**
-     * @throws DominioException Si el tipo de padre no admite subtareas.
+     * @throws DominioException Si la tarea padre no admite subtareas.
      */
-    public static function exigirPadreCompuesto(string $tipoPadre): void
+    public static function exigirPadreAdmiteSubtareas(TareaInterface $padre): void
     {
-        if (!self::padreAceptaSubtareas($tipoPadre)) {
+        // [POLIMORFISMO] la tarea responde por sí misma; no se compara su tipo.
+        if (!$padre->admiteSubtareas()) {
             throw new DominioException('Solo las tareas compuestas pueden tener subtareas.');
         }
     }

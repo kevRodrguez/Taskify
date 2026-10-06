@@ -1,5 +1,8 @@
 -- Taskify · Fase 2 · Datos de prueba (ejecutar después de schema.sql)
 
+-- Los scripts están en UTF-8: sin esto, el cliente mysql de Windows daña los acentos.
+SET NAMES utf8mb4;
+
 USE taskify;
 
 -- Tareas simples (avance manual)

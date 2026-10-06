@@ -1,6 +1,9 @@
 -- Taskify · Fase 2 · Esquema relacional (MySQL / MariaDB)
 -- Jerarquía de tareas: tabla única con columna `tipo` (Single Table Inheritance).
 
+-- Los scripts están en UTF-8: sin esto, el cliente mysql de Windows daña los acentos.
+SET NAMES utf8mb4;
+
 CREATE DATABASE IF NOT EXISTS taskify
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;

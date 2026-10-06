@@ -71,16 +71,10 @@ $imagenActual = $imagenActual ?? null;
         </div>
     <?php endforeach; ?>
 
-    <div class="campo">
-        <label for="imagen">Imagen (JPG, PNG o WEBP, máx. 2 MB)</label>
-        <?php if (is_string($imagenActual) && $imagenActual !== ''): ?>
-            <img class="miniatura" src="<?= e('/uploads/' . rawurlencode(basename($imagenActual))) ?>" alt="Imagen actual de la tarea" width="48" height="48">
-            <small>Si elige un archivo nuevo, reemplazará la imagen actual.</small>
-        <?php endif; ?>
-        <input id="imagen" name="imagen" type="file" accept="image/jpeg,image/png,image/webp"
-            aria-describedby="imagen-error" aria-invalid="<?= array_key_exists('imagen', $errores) ? 'true' : 'false' ?>">
-        <?php $campo = 'imagen'; require __DIR__ . '/campo_error.php'; ?>
-    </div>
+    <?php
+    $imagenTitulo = trim((string) ($valores['titulo'] ?? '')) ?: 'la tarea';
+    require __DIR__ . '/campo_imagen.php';
+    ?>
 
     <p>
         <button class="btn" type="submit"><?= e($textoBoton) ?></button>

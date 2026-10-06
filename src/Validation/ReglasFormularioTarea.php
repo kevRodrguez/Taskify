@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace App\Validation;
 
 use App\Factories\TareaFactory;
-use App\Tareas\Periodicidad;
 use App\Tareas\TareaBase;
-use App\Tareas\TareaRecurrente;
-use App\Tareas\TareaSimple;
 
 /**
  * Reglas del caso C aplicadas al formulario de tareas.
@@ -37,22 +34,35 @@ final class ReglasFormularioTarea
         $fechaCreacion = $datos['fecha_creacion'] ?? date('Y-m-d');
         $validador->fechaNoAnterior('fecha_vencimiento', $datos['fecha_vencimiento'] ?? null, $fechaCreacion);
 
-        if ($tipo === TareaSimple::TIPO || $tipo === TareaRecurrente::TIPO) {
-            $validador
-                ->requerido('avance', $datos['avance'] ?? null)
-                ->rangoNumerico('avance', $datos['avance'] ?? null, 0, 100);
-        }
-
-        if ($tipo === TareaRecurrente::TIPO) {
-            $periodicidades = array_map(
-                static fn (Periodicidad $p): string => $p->value,
-                Periodicidad::cases()
-            );
-            $validador
-                ->requerido('periodicidad', $datos['periodicidad'] ?? null)
-                ->enLista('periodicidad', $datos['periodicidad'] ?? null, $periodicidades);
+        if (TareaFactory::existe($tipo)) {
+            // [POLIMORFISMO] cada tipo declara sus campos; aquí no se pregunta qué tipo es.
+            foreach (TareaFactory::camposDe($tipo) as $campo) {
+                self::validarCampo($validador, $campo, $datos[$campo['nombre']] ?? null);
+            }
         }
 
         return $validador;
+    }
+
+    /**
+     * Aplica las reglas que declara el descriptor del campo (ver camposEspecificos()).
+     *
+     * @param array<string, mixed> $campo
+     */
+    private static function validarCampo(Validador $validador, array $campo, mixed $valor): void
+    {
+        $nombre = (string) $campo['nombre'];
+
+        if (!empty($campo['requerido'])) {
+            $validador->requerido($nombre, $valor);
+        }
+
+        if (isset($campo['min'], $campo['max'])) {
+            $validador->rangoNumerico($nombre, $valor, $campo['min'], $campo['max']);
+        }
+
+        if (isset($campo['opciones'])) {
+            $validador->enLista($nombre, $valor, array_keys($campo['opciones']));
+        }
     }
 }
