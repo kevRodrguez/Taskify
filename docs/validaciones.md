@@ -5,7 +5,7 @@ Documento exigido por el informe: reglas en cliente (HTML5), servidor y mensajes
 ## Cómo probar la validación del servidor (obligatorio)
 
 1. Abrir un formulario (crear tarea o asignar subtarea).
-2. Agregar el atributo **`novalidate`** al `<form>` (ya incluido en subtareas; usarlo también al probar tareas).
+2. Agregar el atributo **`novalidate`** al `<form>` desde las herramientas del desarrollador (ningún formulario lo trae en el código).
 3. Enviar datos inválidos a propósito (campos vacíos, fechas imposibles, avance 999).
 4. Confirmar que el servidor rechaza el envío, conserva los valores y muestra mensajes por campo.
 
